@@ -41,3 +41,4 @@ api/manifest.yaml
 
 # Ignore the ROS generated CMakeLists.txt
 /CMakeLists.txt
+.vscode
