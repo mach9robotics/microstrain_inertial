@@ -55,9 +55,12 @@
     <rosparam file="$(arg params_file)" command="load" unless="$(eval arg('params_file') == '')" />
   </node>
 
-<node name="microstrain_inertial_quickview" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find microstrain_inertial_rqt)/microstrain_inertial_rqt_common/resource/quickview.perspective">
+  <node name="microstrain_inertial_quickview" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find microstrain_inertial_rqt)/microstrain_inertial_rqt_common/resource/quickview.perspective">
     <!-- Pass the name of the driver in as an environment variable -->
     <env name="MICROSTRAIN_INERTIAL_RQT_NODE_NAME" value="$(arg namespace)" />
   </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find microstrain_inertial_driver)/config/gps_odom.rviz"/>
+  <node pkg="microstrain_inertial_driver" type="odom_converter" name="odom_converter" output="screen"/>
 
 </launch>
