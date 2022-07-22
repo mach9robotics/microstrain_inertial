@@ -24,7 +24,7 @@ void odom_cb(const nav_msgs::Odometry::ConstPtr& odom_llc)
     double err;
     auto cov = odom_llc->pose.covariance;
     err = cov[0] + cov[7] + cov[14];
-    // ROS_WARN_STREAM("ERROR: " << err);
+    ROS_WARN_STREAM("ERROR: " << err);
     if (err >= 0.1 && get_initial == false)
     {
         return;
