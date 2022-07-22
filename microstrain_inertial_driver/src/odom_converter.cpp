@@ -6,12 +6,10 @@
 #include "microstrain_inertial_msgs/FilterStatus.h"
 #include <visualization_msgs/Marker.h>
 
-// double lat = 40.46;
-// double lon = -79.96;
-// double alt = 244.86;
 
 static GeographicLib::LocalCartesian odom_converter;
 static bool is_initial = true;
+static bool get_initial = false;
 static int filter_status;
 ros::Publisher odom_pub;
 ros::Publisher start_marker_pub;
@@ -22,10 +20,16 @@ static visualization_msgs::Marker marker;
 
 void odom_cb(const nav_msgs::Odometry::ConstPtr& odom_llc)
 {
-    if (filter_status != 4)
+    // odom_llc->pose.covariance;
+    double err;
+    auto cov = odom_llc->pose.covariance;
+    err = cov[0] + cov[7] + cov[14];
+    // ROS_WARN_STREAM("ERROR: " << err);
+    if (err >= 0.1 && get_initial == false)
     {
         return;
     }
+    else get_initial = true;
     double lat = odom_llc->pose.pose.position.y;
     double lon = odom_llc->pose.pose.position.x;
     double alt = odom_llc->pose.pose.position.z;
@@ -54,6 +58,7 @@ void odom_cb(const nav_msgs::Odometry::ConstPtr& odom_llc)
     odom_cart.pose.pose.position.x = x;
     odom_cart.pose.pose.position.y = y;
     odom_cart.pose.pose.position.z = z;
+    odom_cart.header.stamp = ros::Time::now();
     odom_cart.child_frame_id = "sensor_cartesian";
     odom_pub.publish(odom_cart);
     return;
