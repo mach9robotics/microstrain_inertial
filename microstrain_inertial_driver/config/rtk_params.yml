@@ -15,7 +15,7 @@
 # aux_port is only available for the GQ7 and is only needed when streaming RTCM corrections to the device from ROS, or if you want to publish NMEA sentences from this node
 port        : "/dev/microstrain_main"
 aux_port    : "/dev/ttyUSB0"
-baudrate    : 921600
+baudrate    : 115200
 debug       : True
 diagnostics : True
 
