@@ -1,3 +1,12 @@
+/**
+ * Copyright (C) Mach9 Robotics, Inc - All Rights Reserved
+ * Proprietary and confidential
+ *
+ * Transfer odom from LLC frame to ENU frame
+ *
+ * Written by Jason Zheng <jason@mach9.io>, July 2022
+ */
+
 #include <ros/ros.h>
 #include <string>
 #include <nav_msgs/Odometry.h>
@@ -72,7 +81,6 @@ void filter_status_cb(const microstrain_inertial_msgs::FilterStatus::ConstPtr& s
 int main(int argc, char** argv)
 {
     ros::init(argc,argv, "odom_converter");
-    std::string deviceName;
     ros::NodeHandle nh;
 
     //initialize a start marker
