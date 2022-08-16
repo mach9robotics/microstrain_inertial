@@ -9,7 +9,7 @@
   <arg name="namespace"   default = "GQ7/"                        doc = "Namespace to use when launching the nodes in this launch file" />
   <arg name="node_name"   default = "GQ7_driver"                  doc = "Name to give the Microstrain Inertial Driver" />
   <arg name="debug"       default = "true"                        doc = "Whether or not to log debug information." />
-  <arg name="params_file" default = ""                            doc = "Path to file that will load additional parameters" />
+  <arg name="params_file" default = "$(find microstrain_inertial_driver)/config/rtk_params.yml"     doc = "Path to file that will load additional parameters" />
 
   <!-- Add some old launch parameters for backwards compatibility -->
   <!-- NOTE: These parameters are deprecated and will be removed in a future release. It is strongly recommended to use the new params_file option instead -->
@@ -62,5 +62,8 @@
 
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find microstrain_inertial_driver)/config/gps_odom.rviz"/>
   <node pkg="microstrain_inertial_driver" type="odom_converter" name="odom_converter" output="screen"/>
+
+  <!-- include ntrip client launch -->
+  <include file="$(find ntrip_client)/launch/ntrip_client.launch"/>
 
 </launch>
