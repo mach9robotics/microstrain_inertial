@@ -6,10 +6,10 @@
 <launch>
 
   <!-- Declare arguments with default values -->
-  <arg name="namespace"   default = "/"                           doc = "Namespace to use when launching the nodes in this launch file" />
-  <arg name="node_name"   default = "microstrain_inertial_driver" doc = "Name to give the Microstrain Inertial Driver" />
-  <arg name="debug"       default = "false"                       doc = "Whether or not to log debug information." />
-  <arg name="params_file" default = ""                            doc = "Path to file that will load additional parameters" />
+  <arg name="namespace"   default = "GQ7/"                        doc = "Namespace to use when launching the nodes in this launch file" />
+  <arg name="node_name"   default = "GQ7_driver"                  doc = "Name to give the Microstrain Inertial Driver" />
+  <arg name="debug"       default = "true"                        doc = "Whether or not to log debug information." />
+  <arg name="params_file" default = "$(find microstrain_inertial_driver)/config/rtk_params.yml"     doc = "Path to file that will load additional parameters" />
 
   <!-- Add some old launch parameters for backwards compatibility -->
   <!-- NOTE: These parameters are deprecated and will be removed in a future release. It is strongly recommended to use the new params_file option instead -->
@@ -35,7 +35,7 @@
   <node name="$(arg node_name)" pkg="microstrain_inertial_driver" type="microstrain_inertial_driver_node" output="screen" ns="$(arg namespace)">
 
     <!-- Load the default params file. -->
-    <rosparam file="$(find microstrain_inertial_driver)/microstrain_inertial_driver_common/config/params.yml" command="load" />
+    <rosparam file="$(find microstrain_inertial_driver)/config/rtk_params.yml" command="load" />
 
     <!-- NOTE: These parameters are deprecated and will be removed in a future release. It is strongly recommended to use the new params_file option instead -->
     <param name="port"                  value="$(arg port)"                  type="str"  unless="$(eval arg('port') == '')" />
@@ -60,7 +60,10 @@
     <env name="MICROSTRAIN_INERTIAL_RQT_NODE_NAME" value="$(arg namespace)" />
   </node>
 
-  <!-- <node pkg="tf" type="static_transform_publisher" name="world2sensor" args="0 0 0 0 0 0 1 world sensor_wgs84 100" /> -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find microstrain_inertial_driver)/config/gps_odom.rviz"/>
+  <node pkg="microstrain_inertial_driver" type="odom_converter" name="odom_converter" output="screen"/>
+
+  <!-- include ntrip client launch -->
+  <include file="$(find ntrip_client)/launch/ntrip_client.launch"/>
 
 </launch>

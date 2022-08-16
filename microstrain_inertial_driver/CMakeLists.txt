@@ -41,6 +41,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  visualization_msgs
   std_srvs
   tf2
   tf2_ros
@@ -48,6 +49,47 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   microstrain_inertial_msgs
 )
+
+
+# Look for GeographicLib
+#
+# Sets
+#  GeographicLib_FOUND = TRUE
+#  GeographicLib_INCLUDE_DIRS = /usr/local/include
+#  GeographicLib_LIBRARIES = /usr/local/lib/libGeographic.so
+#  GeographicLib_LIBRARY_DIRS = /usr/local/lib
+
+find_library (GeographicLib_LIBRARIES Geographic
+  PATHS "${CMAKE_INSTALL_PREFIX}/../GeographicLib/lib")
+
+  if (GeographicLib_LIBRARIES)
+  get_filename_component (GeographicLib_LIBRARY_DIRS
+    "${GeographicLib_LIBRARIES}" PATH)
+
+  get_filename_component (_ROOT_DIR "${GeographicLib_LIBRARY_DIRS}" PATH)
+  set (GeographicLib_INCLUDE_DIRS "${_ROOT_DIR}/include")
+  set (GeographicLib_BINARY_DIRS "${_ROOT_DIR}/bin")
+  if (NOT EXISTS "${GeographicLib_INCLUDE_DIRS}/GeographicLib/Config.h")
+    get_filename_component(_ROOT_DIR "${_ROOT_DIR}" PATH)                     # Added to script
+    set (GeographicLib_INCLUDE_DIRS "${_ROOT_DIR}/include")                   # Added to script
+    set (GeographicLib_BINARY_DIRS "${_ROOT_DIR}/bin")                        # Added to script
+    if (NOT EXISTS "${GeographicLib_INCLUDE_DIRS}/GeographicLib/Config.h")    # Added to script
+      unset (GeographicLib_INCLUDE_DIRS)
+      unset (GeographicLib_LIBRARIES)
+      unset (GeographicLib_LIBRARY_DIRS)
+      unset (GeographicLib_BINARY_DIRS)
+    endif()                                                                   # Added to script
+  endif ()
+  unset (_ROOT_DIR)                                                           # Moved below if() statements
+endif ()
+
+include (FindPackageHandleStandardArgs)
+find_package_handle_standard_args (GeographicLib DEFAULT_MSG
+  GeographicLib_LIBRARY_DIRS GeographicLib_LIBRARIES GeographicLib_INCLUDE_DIRS)
+mark_as_advanced (GeographicLib_LIBRARY_DIRS GeographicLib_LIBRARIES
+  GeographicLib_INCLUDE_DIRS)
+
+
 
 ###################################
 ## catkin specific configuration ##
@@ -62,6 +104,7 @@ catkin_package(
   INCLUDE_DIRS
     include
   CATKIN_DEPENDS
+    cmake_modules
     roscpp
     cmake_modules
     tf2
@@ -74,6 +117,7 @@ catkin_package(
     nav_msgs
     nmea_msgs
     mavros_msgs
+    visualization_msgs
     message_runtime
     microstrain_inertial_msgs
 )
@@ -83,6 +127,7 @@ catkin_package(
 
 # Add the catkin includes
 include_directories(${catkin_INCLUDE_DIRS} include ${COMMON_DIR}/include)
+
 
 # Set some general CMake flags
 add_definitions(-std=c++11)
@@ -130,6 +175,7 @@ set(NODE_INC_FILES
   include/${PROJECT_NAME}/microstrain_diagnostic_updater.h
 )
 add_executable(${PROJECT_NAME}_node ${NODE_SRC_FILES} ${NODE_INC_FILES})
+add_executable(odom_converter src/odom_converter.cpp)
 
 # Let the code know if it is being compiled with ROS1 or ROS2
 if(DEFINED ENV{ROS_VERSION})
@@ -150,12 +196,22 @@ target_link_libraries(${PROJECT_NAME}_node
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
+target_link_libraries(odom_converter
+  ${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  ${GeographicLib_LIBRARIES}
+)
+
+add_dependencies(odom_converter
+  ${catkin_EXPORTED_TARGETS}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
 
 #############
 ## Install ##
 #############
 
-install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node odom_converter
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
