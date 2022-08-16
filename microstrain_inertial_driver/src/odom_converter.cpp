@@ -1,6 +1,5 @@
 /**
  * Copyright (C) Mach9 Robotics, Inc - All Rights Reserved
- * Proprietary and confidential
  *
  * Transfer odom from LLC frame to ENU frame
  *
